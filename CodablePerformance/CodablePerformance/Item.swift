@@ -18,6 +18,13 @@ struct ItemResponse: Codable {
   var result: [Item]
 }
 
+class ItemParser {
+  func parse(from data: Data) throws -> ItemResponse  {
+    let decoder = JSONDecoder()
+    return try decoder.decode(ItemResponse.self, from: data)
+  }
+}
+
 // MARK: - Manual
 struct ItemManual {
   var id: Int
@@ -36,16 +43,54 @@ struct ItemResponseManual {
   }
 }
 
-// MARK: - Parser
-class ItemParser {
-  func parse(from data: Data) -> ItemResponse {
-    let decoder = JSONDecoder()
-    return try! decoder.decode(ItemResponse.self, from: data)
+class ItemParserManual {
+  func parse(from data: Data) throws -> ItemResponseManual {
+    return ItemResponseManual(dict: try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any])
   }
 }
 
-class ItemParserManual {
-  func parse(from data: Data) -> ItemResponseManual {
-    return ItemResponseManual(dict: try! JSONSerialization.jsonObject(with: data, options: []) as! [String: Any])
+// MARK: - Manual With Casting value
+struct ItemManualCast {
+  var id: Int
+  var itemTitle: String
+
+  init(dict: [String: Any]) throws {
+    id = try cast(dict["id"])
+    itemTitle = try cast(dict["itemTitle"])
   }
+}
+
+struct ItemResponseManualCast {
+  var result: [ItemManualCast]
+  init(dict: [String: Any]) throws {
+    result = try (try cast(dict["result"]) as [[String: Any]]).map { try ItemManualCast(dict: $0) }
+  }
+}
+
+class ItemParserManualCast {
+  func parse(from data: Data) throws -> ItemResponseManualCast  {
+    return try ItemResponseManualCast(dict: try JSONSerialization.jsonObject(with: data, options: []) as! [String: Any])
+  }
+}
+
+// MARK: Cast helper
+struct CastError: Error {
+  public let explanation: String
+  public let file: String
+  public let line: Int
+  public let function: String
+
+  public init(explanation: String, file: String = #file, line: Int = #line, function: String = #function) {
+    self.explanation = explanation
+    self.file = URL(fileURLWithPath: file).lastPathComponent
+    self.line = line
+    self.function = function
+  }
+
+}
+
+@inline(__always)
+func cast<FromType, ToType>(_ value: FromType, file: String = #file, line: Int = #line, function: String = #function) throws -> ToType {
+  guard let toValue = value as? ToType else { throw CastError(explanation: " \(value) is unexpected", file: file, line: line, function: function) }
+  return toValue
 }

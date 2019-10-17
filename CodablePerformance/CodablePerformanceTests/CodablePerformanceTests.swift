@@ -11,7 +11,7 @@ import XCTest
 
 class CodablePerformanceTests: XCTestCase {
 
-  var count = 1000 * 1000
+  var count = 100 * 1000
   var data: Data!
 
   override func setUp() {
@@ -27,14 +27,21 @@ class CodablePerformanceTests: XCTestCase {
   func testAutoDecode() {
     let parser = ItemParser()
     self.measure {
-      let _ = parser.parse(from: data)
+      let _ = try! parser.parse(from: data)
     }
   }
 
   func testManualDecode() {
     let parser = ItemParserManual()
     self.measure {
-      let _ = parser.parse(from: data)
+      let _ = try! parser.parse(from: data)
+    }
+  }
+
+  func testManualDecodeWithSafeCasting() {
+    let parser = ItemParserManualCast()
+    self.measure {
+      let _ = try! parser.parse(from: data)
     }
   }
 
@@ -45,4 +52,3 @@ class CodablePerformanceTests: XCTestCase {
   }
 
 }
-
