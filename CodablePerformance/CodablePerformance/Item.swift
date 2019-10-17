@@ -18,6 +18,7 @@ struct ItemResponse: Codable {
   var result: [Item]
 }
 
+// MARK: - Manual
 struct ItemManual {
   var id: Int
   var itemTitle: String
@@ -28,7 +29,6 @@ struct ItemManual {
   }
 }
 
-// MARK: - Manual
 struct ItemResponseManual {
   var result: [ItemManual]
   init(dict: [String: Any]) {
@@ -36,6 +36,7 @@ struct ItemResponseManual {
   }
 }
 
+// MARK: - Parser
 class ItemParser {
   func parse(from data: Data) -> ItemResponse {
     let decoder = JSONDecoder()
