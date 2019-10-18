@@ -11,7 +11,7 @@ import XCTest
 
 class CodablePerformanceTests: XCTestCase {
 
-  var count = 100 * 1000
+  var count = 10 * 1000
   var data: Data!
 
   override func setUp() {
